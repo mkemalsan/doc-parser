@@ -2,46 +2,56 @@ const express = require('express')
 const app = express()
 const port = 3000
 
-app.use(express.json({limit: '50mb'}));
-app.use(express.urlencoded({
-  extended: true, limit: '50mb'}));
-
-
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-})
 
 
 
+const http = require('http'); // or 'https' for https:// URLs
+const fs = require('fs');
+
+const path = require('path');
+
+const PizZip = require('pizzip');
+const Docxtemplater = require('docxtemplater');
 
 
-function parseDoc(){
+const spauth = require('node-sp-auth');
+const request = require('request-promise');
 
-}
-
-
-
-
-app.post('/', (req, res) => {
+const url = 'https://hn594a44314c984.sharepoint.com/';  
+const clientId = "fa78755c-5c36-437e-83ec-cffb77c4fe84";  
+const clientSecret = "dwcheLsZzbfLcvekh4+lfC5Ef3wjeFvxSXJ3amldfe4=";
 
 
+var docURI = "/Gedeelde documenten/AOK-001 - 001 Kemal San - 2021-02-26T22_21_57.8233425Z.docx";
+var docName = path.basename(docURI)
+var siteSP = "/sites/testwaarschuwingsbeleidtest2"
+
+spauth
+  .getAuth('https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/', {
+    username: 'kemal@deggroep.nl',
+    password: '41Mijnkoplokop43106',
+
+  })
+  .then(data => {
+    var headers = data.headers;
+    headers['Accept'] = 'application/json;odata=verbose';
+    headers['Content-type'] = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    request.get({
+      url: "https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/_api/web/GetFileByServerRelativeUrl('" + siteSP + docURI + "')/$value",
+      headers: headers,
+      encoding: "binary",
+      json: true
+    }).then(response => {
+        const buffer = Buffer.from(response, 'binary');
+        fs.writeFileSync('./tmp/' + docName, buffer);
+    });
+  });
 
 
 
 
-    res.send(req.body)
 
-})
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
-})
-
-var PizZip = require('pizzip');
-var Docxtemplater = require('docxtemplater');
-
-var fs = require('fs');
-var path = require('path');
 
 // The error object contains additional information when logged with JSON.stringify (it contains a properties object containing all suberrors).
 function replaceErrors(key, value) {
@@ -103,3 +113,37 @@ var buf = doc.getZip()
 
 // buf is a nodejs buffer, you can either write it to a file or do anything else with it.
 fs.writeFileSync(path.resolve(__dirname, 'output.docx'), buf);
+
+
+
+
+
+
+// app.use(express.json({limit: '50mb'}));
+// app.use(express.urlencoded({
+//   extended: true, limit: '50mb'}));
+
+
+// app.get('/', (req, res) => {
+//   res.send('Hello World!')
+// })
+
+
+// app.post('/', (req, res) => {
+
+
+
+
+
+
+//     res.send(req.body)
+
+// })
+
+// app.listen(port, () => {
+//   console.log(`Example app listening at http://localhost:${port}`)
+// })
+
+
+
+
