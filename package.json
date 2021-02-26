@@ -20,6 +20,7 @@
   "keywords": [],
   "dependencies": {
     "docxtemplater": "^3.20.1",
+    "express": "^4.17.1",
     "pizzip": "^3.0.6"
   }
 }

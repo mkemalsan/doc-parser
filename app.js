@@ -1,3 +1,15 @@
+const express = require('express')
+const app = express()
+const port = 3000
+
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+})
+
+app.listen(port, () => {
+  console.log(`Example app listening at http://localhost:${port}`)
+})
+
 var PizZip = require('pizzip');
 var Docxtemplater = require('docxtemplater');
 
@@ -44,7 +56,7 @@ try {
 
 //set the templateVariables
 doc.setData({
-    first_name: 'John',
+    first_name: 'Kemal',
     last_name: 'Doe',
     phone: '0652455478',
     description: 'New Website'
