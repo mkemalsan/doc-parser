@@ -1,0 +1,24 @@
+{
+  "name": "doc-parser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mkemalsan/doc-parser.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mkemalsan/doc-parser/issues"
+  },
+  "homepage": "https://github.com/mkemalsan/doc-parser#readme",
+  "keywords": [],
+  "dependencies": {
+    "docxtemplater": "^3.20.1",
+    "pizzip": "^3.0.6"
+  }
+}
