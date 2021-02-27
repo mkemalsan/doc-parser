@@ -109,6 +109,8 @@ function getSPDocument(documentURI, formData){
         })
         .then(response => {
             const buffer = Buffer.from(response, 'binary');
+            console.log(buffer)
+            console.log("hoi")
             fs.writeFileSync('./tmp/' + docName, buffer);
      
 
@@ -172,154 +174,198 @@ function getSPDocument(documentURI, formData){
             fs.writeFileSync(path.resolve(__dirname, 'tmp/' + docName), buf);
 
 
-
-
-
-            // 
-            // 
-            // 
-            // 
-            // 
-            // var req = request.post("https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/_api/web/GetFolderByServerRelativeUrl('" + dirName + "')/Files/add(url='" + docName + "',overwrite=true)", function (err, resp, body) {
-            //   if (err) {
-            //     console.log('Error!');
-            //   } else {
-            //     console.log('URL: ' + body);
-            //   }
-            // });
-            // var form = req.form();
-            // form.append('file', fs.createReadStream(path.resolve(__dirname, 'tmp/' + docName)));
-
-
-
-
-
-
-
-            // console.log(headers)
-            // var options = {
-            //     method: 'POST',
-            //     uri: "https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/_api/web/GetFolderByServerRelativeUrl('" + dirName + "')/Files/add(url='" + docName + "',overwrite=true)",
-            //     formData: {
-            //         // Like <input type="text" name="name">
-            //         // name: 'Jenn',
-            //         // Like <input type="file" name="file">
-            //         file: {
-            //             value: fs.createReadStream('tmp/' + docName),
-            //             // options: {
-            //             //     filename: 'test.jpg',
-            //             //     contentType: 'image/jpg'
-            //             // }
-            //         }
-            //     },
-            //     headers: headers
-            //     // {
-            //     //      'content-type': 'multipart/form-data'  // Is set automatically
-            //     // }
-            // };
-             
-            // request(options)
-            //     .then(function (body) {
-            //         // POST succeeded...
-            //     })
-            //     .catch(function (err) {
-            //         // POST failed...
-            //     });
         })
 
         .finally(()=> {
-
+            // postSPDocument(documentURI)
         })
     })
 
 
 
-        // BEARER TOKEN
-        spauth
-        .getAuth('https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/', {
-        clientId: clientId,
-        clientSecret: clientSecret
+spauth
+    .getAuth('https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/', {
+    clientId: clientId,
+    clientSecret: clientSecret
+    })
+    .then(data => {
+        console.log(data.headers['Authorization'])
+        token = data.headers['Authorization']
+        var headers = data.headers;
+        headers['Accept'] = 'application/json;odata=verbose';
+
+
+    });
+
+
+
+
+    // FORM DIGEST VALUE
+    spauth
+    .getAuth('https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/', {
+    username: 'kemal@deggroep.nl',
+    password: '41Mijnkoplokop43106',
+
+    })
+    .then(data => {
+        var headers = data.headers;
+
+        headers['Authorization'] = token
+        headers['Accept'] = 'application/json;odata=verbose';
+        headers['Content-type'] = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        
+        console.log(headers)
+        request
+        .post({
+            url: "https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/_api/contextinfo",
+            headers: headers
         })
-        .then(data => {
-            console.log(data.headers['Authorization'])
-            token = data.headers['Authorization']
-            var headers = data.headers;
-            headers['Accept'] = 'application/json;odata=verbose';
+        .then(response => {
+            response = JSON.parse(response)
 
+            var postData = fs.readFileSync(path.resolve(__dirname, 'tmp/' + docName), 'binary');
 
-        });
+            headers = {
+                'Authorization': headers['Authorization'],
+                'X-RequestDigest' : response.d.GetContextWebInformation.FormDigestValue,
+                'Accept': "application/json;odata=verbose",
+                'Content-Type': "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                'Content-length': Buffer.byteLength(file, 'utf8')
+            }
 
+            var uri =  encodeURI(sharepointSite + "/_api/web/GetFolderByServerRelativeUrl('" + sharepointSite + dirName + "')/Files/add(url='" + Date.now() + docName + "',overwrite=true)")
 
+            var options = {
+              'method': 'POST',
+              'hostname': 'hn594a44314c984.sharepoint.com',
+              'path': uri,
+              'headers': headers,
+              'maxRedirects': 20
+            };
 
+            var req = https.request(options, function (res) {
+              var chunks = [];
 
-        // FORM DIGEST VALUE
-        spauth
-        .getAuth('https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/', {
-        username: 'kemal@deggroep.nl',
-        password: '41Mijnkoplokop43106',
+              res.on("data", function (chunk) {
+                chunks.push(chunk);
+              });
 
+              res.on("end", function (chunk) {
+                var body = Buffer.concat(chunks);
+                console.log(body.toString());
+              });
+
+              res.on("error", function (error) {
+                console.error(error);
+              });
+            });
+            // console.log(postData);
+
+            req.write(file);
+            req.end();
         })
-        .then(data => {
-            var headers = data.headers;
-
-            headers['Authorization'] = token
-            headers['Accept'] = 'application/json;odata=verbose';
-            headers['Content-type'] = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-            
-            console.log(headers)
-            request
-            .post({
-                url: "https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/_api/contextinfo",
-                headers: headers
-            })
-            .then(response => {
-                response = JSON.parse(response)
-                console.log(response)
-                console.log(response.d.GetContextWebInformation.FormDigestValue)
-                // headers['X-RequestDigest'] = response.d.GetContextWebInformation.FormDigestValue
-                console.log(typeof(headers))
-                // headers['Accept'] = "application/json;odata=verbose"
-                delete headers['Cookie']
-
-                headers = {
-                    'Authorization': headers['Authorization'],
-                    'X-RequestDigest' : response.d.GetContextWebInformation.FormDigestValue,
-                    'Accept': "application/json;odata=verbose",
-                    'Content-Type': "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                }
-
-                var uri =  encodeURI(sharepointSite + "/_api/web/GetFolderByServerRelativeUrl('" + sharepointSite + dirName + "')/Files/add(url='" + docName + "',overwrite=true)")
-
-                var options = {
-                  'method': 'POST',
-                  'hostname': 'hn594a44314c984.sharepoint.com',
-                  'path': uri,
-                  'headers': headers,
-                  'maxRedirects': 20
-                };
-
-                var req = https.request(options, function (res) {
-                  var chunks = [];
-
-                  res.on("data", function (chunk) {
-                    chunks.push(chunk);
-                  });
-
-                  res.on("end", function (chunk) {
-                    var body = Buffer.concat(chunks);
-                    console.log(body.toString());
-                  });
-
-                  res.on("error", function (error) {
-                    console.error(error);
-                  });
-                });
-                var postData = fs.readFileSync('tmp/' + docName, 'binary')
-
-                req.write(postData);
-                req.end();
-            })
-        })
-
+    })
 
 }
+
+
+
+
+function postSPDocument(documentURI){
+    var documentURI = documentURI
+    var docName = path.basename(documentURI)
+    var dirName = path.dirname(documentURI)
+    // BEARER TOKEN
+    spauth
+    .getAuth('https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/', {
+    clientId: clientId,
+    clientSecret: clientSecret
+    })
+    .then(data => {
+        console.log(data.headers['Authorization'])
+        token = data.headers['Authorization']
+        var headers = data.headers;
+        headers['Accept'] = 'application/json;odata=verbose';
+
+
+    });
+
+
+
+
+    // FORM DIGEST VALUE
+    spauth
+    .getAuth('https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/', {
+    username: 'kemal@deggroep.nl',
+    password: '41Mijnkoplokop43106',
+
+    })
+    .then(data => {
+        var headers = data.headers;
+
+        headers['Authorization'] = token
+        headers['Accept'] = 'application/json;odata=verbose';
+        headers['Content-type'] = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        
+        console.log(headers)
+        request
+        .post({
+            url: "https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/_api/contextinfo",
+            headers: headers
+        })
+        .then(response => {
+            response = JSON.parse(response)
+
+            var postData = fs.readFileSync(path.resolve(__dirname, 'tmp/' + docName), 'binary');
+
+            headers = {
+                'Authorization': headers['Authorization'],
+                'X-RequestDigest' : response.d.GetContextWebInformation.FormDigestValue,
+                'Accept': "application/json;odata=verbose",
+                'Content-Type': "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                'Content-length': Buffer.byteLength(file, 'utf8')
+            }
+
+            var uri =  encodeURI(sharepointSite + "/_api/web/GetFolderByServerRelativeUrl('" + sharepointSite + dirName + "')/Files/add(url='" + Date.now() + docName + "',overwrite=true)")
+
+            var options = {
+              'method': 'POST',
+              'hostname': 'hn594a44314c984.sharepoint.com',
+              'path': uri,
+              'headers': headers,
+              'maxRedirects': 20
+            };
+
+            var req = https.request(options, function (res) {
+              var chunks = [];
+
+              res.on("data", function (chunk) {
+                chunks.push(chunk);
+              });
+
+              res.on("end", function (chunk) {
+                var body = Buffer.concat(chunks);
+                console.log(body.toString());
+              });
+
+              res.on("error", function (error) {
+                console.error(error);
+              });
+            });
+            // console.log(postData);
+
+            req.write(file);
+            req.end();
+        })
+    })
+
+}
+
+
+
+
+
+
+
+
+
