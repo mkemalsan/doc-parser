@@ -2,55 +2,64 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
 
+const https = require('https')
+const fs = require('fs')
+const path = require('path')
+
+const PizZip = require('pizzip')
+const Docxtemplater = require('docxtemplater')
+
+const spauth = require('node-sp-auth')
+const request = require('request-promise')
+
+const url = "https://hn594a44314c984.sharepoint.com/"
+const clientId = "fa78755c-5c36-437e-83ec-cffb77c4fe84"
+const clientSecret = "dwcheLsZzbfLcvekh4+lfC5Ef3wjeFvxSXJ3amldfe4="
+
+var token = ""
+
+const sharepointSite = "/sites/testwaarschuwingsbeleidtest2"
+
+var file = ""
 
 
 
-const http = require('http'); // or 'https' for https:// URLs
-const fs = require('fs');
-
-const path = require('path');
-
-const PizZip = require('pizzip');
-const Docxtemplater = require('docxtemplater');
-
-
-const spauth = require('node-sp-auth');
-const request = require('request-promise');
-
-const url = 'https://hn594a44314c984.sharepoint.com/';  
-const clientId = "fa78755c-5c36-437e-83ec-cffb77c4fe84";  
-const clientSecret = "dwcheLsZzbfLcvekh4+lfC5Ef3wjeFvxSXJ3amldfe4=";
-
-
-
-
+// Init middleware
 app.use(express.json({limit: '50mb'}));
-app.use(express.urlencoded({
-  extended: true, limit: '50mb'}));
+app.use(express.urlencoded({extended: true, limit: '50mb'}));
 
-
+// Hi!
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-
+// POST Request to fill data in placeholders of template
+// REQUEST JSON schema:
+// {
+//      "document": "String",       String is a URI to the template
+//      "data": "String"            String is base64 encoded JSON Object
+// }
 app.post('/', (req, res) => {
-    var documentURI = req.body.document;
-    var sharepointSite = "/sites/testwaarschuwingsbeleidtest2"
-    
-    var formData = req.body.data;
-    formData = Buffer.from(formData, 'base64');
-    formData = formData.toString('utf-8');
-    formData = JSON.parse(formData)
 
-    getSPDocument(documentURI, sharepointSite,formData)
+    var document = req.body.document;
+    var data = req.body.data;
+
+
+    data = Buffer.from(data, 'base64');
+    data = data.toString('utf-8');
+    data = JSON.parse(data)
+
+    getSPDocument(document, data)
+  
     
+
+
     res.send(req.body)
 
 })
 
 app.listen(port, () => {
-  console.log(`listening at port:${port}`)
+  console.log(`Listening at port:${port}`)
 })
 
 
@@ -71,12 +80,14 @@ app.listen(port, () => {
 
 
 
-function getSPDocument(documentURI, sharepointSite,formData){
-    var sharepointSite = sharepointSite
+function getSPDocument(documentURI, formData){
+    // var sharepointSite = sharepointSite
     var documentURI = documentURI
     var docName = path.basename(documentURI)
+    var dirName = path.dirname(documentURI)
+
     var formData = formData
-    console.log(formData)
+    // console.log(formData)
 
 
     spauth
@@ -155,11 +166,160 @@ function getSPDocument(documentURI, sharepointSite,formData){
             var buf = doc.getZip()
                          .generate({type: 'nodebuffer'});
 
+            file = buf
+
             // buf is a nodejs buffer, you can either write it to a file or do anything else with it.
             fs.writeFileSync(path.resolve(__dirname, 'tmp/' + docName), buf);
+
+
+
+
+
+            // 
+            // 
+            // 
+            // 
+            // 
+            // var req = request.post("https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/_api/web/GetFolderByServerRelativeUrl('" + dirName + "')/Files/add(url='" + docName + "',overwrite=true)", function (err, resp, body) {
+            //   if (err) {
+            //     console.log('Error!');
+            //   } else {
+            //     console.log('URL: ' + body);
+            //   }
+            // });
+            // var form = req.form();
+            // form.append('file', fs.createReadStream(path.resolve(__dirname, 'tmp/' + docName)));
+
+
+
+
+
+
+
+            // console.log(headers)
+            // var options = {
+            //     method: 'POST',
+            //     uri: "https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/_api/web/GetFolderByServerRelativeUrl('" + dirName + "')/Files/add(url='" + docName + "',overwrite=true)",
+            //     formData: {
+            //         // Like <input type="text" name="name">
+            //         // name: 'Jenn',
+            //         // Like <input type="file" name="file">
+            //         file: {
+            //             value: fs.createReadStream('tmp/' + docName),
+            //             // options: {
+            //             //     filename: 'test.jpg',
+            //             //     contentType: 'image/jpg'
+            //             // }
+            //         }
+            //     },
+            //     headers: headers
+            //     // {
+            //     //      'content-type': 'multipart/form-data'  // Is set automatically
+            //     // }
+            // };
+             
+            // request(options)
+            //     .then(function (body) {
+            //         // POST succeeded...
+            //     })
+            //     .catch(function (err) {
+            //         // POST failed...
+            //     });
         })
+
         .finally(()=> {
 
         })
     })
+
+
+
+        // BEARER TOKEN
+        spauth
+        .getAuth('https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/', {
+        clientId: clientId,
+        clientSecret: clientSecret
+        })
+        .then(data => {
+            console.log(data.headers['Authorization'])
+            token = data.headers['Authorization']
+            var headers = data.headers;
+            headers['Accept'] = 'application/json;odata=verbose';
+
+
+        });
+
+
+
+
+        // FORM DIGEST VALUE
+        spauth
+        .getAuth('https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/', {
+        username: 'kemal@deggroep.nl',
+        password: '41Mijnkoplokop43106',
+
+        })
+        .then(data => {
+            var headers = data.headers;
+
+            headers['Authorization'] = token
+            headers['Accept'] = 'application/json;odata=verbose';
+            headers['Content-type'] = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            
+            console.log(headers)
+            request
+            .post({
+                url: "https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/_api/contextinfo",
+                headers: headers
+            })
+            .then(response => {
+                response = JSON.parse(response)
+                console.log(response)
+                console.log(response.d.GetContextWebInformation.FormDigestValue)
+                // headers['X-RequestDigest'] = response.d.GetContextWebInformation.FormDigestValue
+                console.log(typeof(headers))
+                // headers['Accept'] = "application/json;odata=verbose"
+                delete headers['Cookie']
+
+                headers = {
+                    'Authorization': headers['Authorization'],
+                    'X-RequestDigest' : response.d.GetContextWebInformation.FormDigestValue,
+                    'Accept': "application/json;odata=verbose",
+                    'Content-Type': "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                }
+
+                var uri =  encodeURI(sharepointSite + "/_api/web/GetFolderByServerRelativeUrl('" + sharepointSite + dirName + "')/Files/add(url='" + docName + "',overwrite=true)")
+
+                var options = {
+                  'method': 'POST',
+                  'hostname': 'hn594a44314c984.sharepoint.com',
+                  'path': uri,
+                  'headers': headers,
+                  'maxRedirects': 20
+                };
+
+                var req = https.request(options, function (res) {
+                  var chunks = [];
+
+                  res.on("data", function (chunk) {
+                    chunks.push(chunk);
+                  });
+
+                  res.on("end", function (chunk) {
+                    var body = Buffer.concat(chunks);
+                    console.log(body.toString());
+                  });
+
+                  res.on("error", function (error) {
+                    console.error(error);
+                  });
+                });
+                var postData = fs.readFileSync('tmp/' + docName, 'binary')
+
+                req.write(postData);
+                req.end();
+            })
+        })
+
+
 }
