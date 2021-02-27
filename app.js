@@ -233,7 +233,7 @@ spauth
                 'Content-length': Buffer.byteLength(file, 'utf8')
             }
 
-            var uri =  encodeURI(sharepointSite + "/_api/web/GetFolderByServerRelativeUrl('" + sharepointSite + dirName + "')/Files/add(url='" + Date.now() + docName + "',overwrite=true)")
+            var uri =  encodeURI(sharepointSite + "/_api/web/GetFolderByServerRelativeUrl('" + sharepointSite + dirName + "')/Files/add(url='1111111" + Date.now() + docName + "',overwrite=true)")
 
             var options = {
               'method': 'POST',
@@ -326,7 +326,7 @@ function postSPDocument(documentURI){
                 'Content-length': Buffer.byteLength(file, 'utf8')
             }
 
-            var uri =  encodeURI(sharepointSite + "/_api/web/GetFolderByServerRelativeUrl('" + sharepointSite + dirName + "')/Files/add(url='" + Date.now() + docName + "',overwrite=true)")
+            var uri =  encodeURI(sharepointSite + "/_api/web/GetFolderByServerRelativeUrl('" + sharepointSite + dirName + "')/Files/add(url='222222" + Date.now() + docName + "',overwrite=true)")
 
             var options = {
               'method': 'POST',
