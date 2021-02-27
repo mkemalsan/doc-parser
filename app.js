@@ -177,7 +177,7 @@ function getSPDocument(documentURI, formData){
         })
 
         .finally(()=> {
-            // postSPDocument(documentURI)
+            postSPDocument(documentURI)
         })
     })
 
