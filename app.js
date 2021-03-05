@@ -250,7 +250,7 @@ function postSPDocument(documentURI){
                 'Content-length': Buffer.byteLength(file, 'utf8')
             }
 
-            var uri =  encodeURI(sharepointSite + "/_api/web/GetFolderByServerRelativeUrl('" + sharepointSite + dirName + "')/Files/add(url='" + docName + "',overwrite=true)")
+            var uri =  encodeURI(sharepointSite + "/_api/web/GetFolderByServerRelativeUrl('" + sharepointSite + dirName + "')/Files/add(url='OUTPUT" + docName + "',overwrite=true)")
 
             var options = {
               'method': 'POST',
