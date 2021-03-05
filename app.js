@@ -36,8 +36,8 @@ app.get('/', (req, res) => {
 // POST Request to fill data in placeholders of template
 // REQUEST JSON schema:
 // {
-//      "document": "String",       String is a URI to the template
-//      "data": "String"            String is base64 encoded JSON Object
+//      "document": "String",       String is expected to be a URI to the template
+//      "data": "String"            String is expected to be a base64 encoded JSON Object
 // }
 app.post('/', (req, res) => {
 
@@ -49,6 +49,20 @@ app.post('/', (req, res) => {
     data = data.toString('utf-8');
     data = JSON.parse(data)
 
+
+    spauth
+    .getAuth('https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/', {
+    clientId: clientId,
+    clientSecret: clientSecret
+    })
+    .then(data => {
+        // console.log(data.headers['Authorization'])
+        token = data.headers['Authorization']
+        var headers = data.headers;
+        headers['Accept'] = 'application/json;odata=verbose';
+
+
+    });
     getSPDocument(document, data)
   
     
@@ -88,6 +102,19 @@ function getSPDocument(documentURI, formData){
 
     var formData = formData
     // console.log(formData)
+    var newData = {}
+
+
+    // Prepare formData data
+    // Expected input:
+    // [{data},{data}]
+    formData.forEach(formDataObject => {
+        newData = { ...newData, ...formDataObject }
+    })
+    // console.log(newData)
+
+
+
 
 
     spauth
@@ -109,8 +136,6 @@ function getSPDocument(documentURI, formData){
         })
         .then(response => {
             const buffer = Buffer.from(response, 'binary');
-            console.log(buffer)
-            console.log("hoi")
             fs.writeFileSync('./tmp/' + docName, buffer);
      
 
@@ -154,7 +179,7 @@ function getSPDocument(documentURI, formData){
             }
 
             //set the templateVariables
-            doc.setData(formData);
+            doc.setData(newData);
 
             try {
                 // render the document (replace all occurences of {first_name} by John, {last_name} by Doe, ...)
@@ -181,91 +206,6 @@ function getSPDocument(documentURI, formData){
         })
     })
 
-
-
-spauth
-    .getAuth('https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/', {
-    clientId: clientId,
-    clientSecret: clientSecret
-    })
-    .then(data => {
-        console.log(data.headers['Authorization'])
-        token = data.headers['Authorization']
-        var headers = data.headers;
-        headers['Accept'] = 'application/json;odata=verbose';
-
-
-    });
-
-
-
-
-    // FORM DIGEST VALUE
-    spauth
-    .getAuth('https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/', {
-    username: 'kemal@deggroep.nl',
-    password: '41Mijnkoplokop43106',
-
-    })
-    .then(data => {
-        var headers = data.headers;
-
-        headers['Authorization'] = token
-        headers['Accept'] = 'application/json;odata=verbose';
-        headers['Content-type'] = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        
-        console.log(headers)
-        request
-        .post({
-            url: "https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/_api/contextinfo",
-            headers: headers
-        })
-        .then(response => {
-            response = JSON.parse(response)
-
-            var postData = fs.readFileSync(path.resolve(__dirname, 'tmp/' + docName), 'binary');
-
-            headers = {
-                'Authorization': headers['Authorization'],
-                'X-RequestDigest' : response.d.GetContextWebInformation.FormDigestValue,
-                'Accept': "application/json;odata=verbose",
-                'Content-Type': "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                'Content-length': Buffer.byteLength(file, 'utf8')
-            }
-
-            var uri =  encodeURI(sharepointSite + "/_api/web/GetFolderByServerRelativeUrl('" + sharepointSite + dirName + "')/Files/add(url='1111111" + Date.now() + docName + "',overwrite=true)")
-
-            var options = {
-              'method': 'POST',
-              'hostname': 'hn594a44314c984.sharepoint.com',
-              'path': uri,
-              'headers': headers,
-              'maxRedirects': 20
-            };
-
-            var req = https.request(options, function (res) {
-              var chunks = [];
-
-              res.on("data", function (chunk) {
-                chunks.push(chunk);
-              });
-
-              res.on("end", function (chunk) {
-                var body = Buffer.concat(chunks);
-                console.log(body.toString());
-              });
-
-              res.on("error", function (error) {
-                console.error(error);
-              });
-            });
-            // console.log(postData);
-
-            req.write(file);
-            req.end();
-        })
-    })
-
 }
 
 
@@ -275,22 +215,6 @@ function postSPDocument(documentURI){
     var documentURI = documentURI
     var docName = path.basename(documentURI)
     var dirName = path.dirname(documentURI)
-    // BEARER TOKEN
-    spauth
-    .getAuth('https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/', {
-    clientId: clientId,
-    clientSecret: clientSecret
-    })
-    .then(data => {
-        console.log(data.headers['Authorization'])
-        token = data.headers['Authorization']
-        var headers = data.headers;
-        headers['Accept'] = 'application/json;odata=verbose';
-
-
-    });
-
-
 
 
     // FORM DIGEST VALUE
@@ -307,7 +231,7 @@ function postSPDocument(documentURI){
         headers['Accept'] = 'application/json;odata=verbose';
         headers['Content-type'] = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         
-        console.log(headers)
+        // console.log(headers)
         request
         .post({
             url: "https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/_api/contextinfo",
@@ -345,7 +269,7 @@ function postSPDocument(documentURI){
 
               res.on("end", function (chunk) {
                 var body = Buffer.concat(chunks);
-                console.log(body.toString());
+                // console.log(body.toString());
               });
 
               res.on("error", function (error) {
