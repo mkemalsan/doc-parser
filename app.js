@@ -22,7 +22,64 @@ const sharepointSite = "/sites/testwaarschuwingsbeleidtest2"
 
 var file = ""
 
+// Please make sure to use angular-expressions 1.1.2 or later
+// More detail at https://github.com/open-xml-templating/docxtemplater/issues/589
+var expressions = require('angular-expressions');
+var assign = require("lodash/assign");
+// define your filter functions here, for example, to be able to write {clientname | lower}
+expressions.filters.lower = function(input) {
+    // This condition should be used to make sure that if your input is
+    // undefined, your output will be undefined as well and will not
+    // throw an error
+    if(!input) return input;
+    return input.toLowerCase();
+}
 
+expressions.filters.valuta = function(input) {
+    // This condition should be used to make sure that if your input is
+    // undefined, your output will be undefined as well and will not
+    // throw an error
+    if(!input) return input;
+    return parseInt(input).toLocaleString("nl-NL", {style: "currency", currency: "EUR", minimumFractionDigits: 2});
+}
+expressions.filters.datum = function(input) {
+    // This condition should be used to make sure that if your input is
+    // undefined, your output will be undefined as well and will not
+    // throw an error
+    if(!input) return input;
+    return input.split("-").reverse().join("-");
+}
+
+
+
+// var date = "03-11-2014";
+// var newdate = date.split("-").reverse().join("-");
+
+// let bla = "2500"
+// console.log(parseInt(bla).toLocaleString("nl-NL", {style: "currency", currency: "EUR", minimumFractionDigits: 2}))
+
+function angularParser(tag) {
+    if (tag === '.') {
+        return {
+            get: function(s){ return s;}
+        };
+    }
+    const expr = expressions.compile(
+        tag.replace(/(’|‘)/g, "'").replace(/(“|”)/g, '"')
+    );
+    return {
+        get: function(scope, context) {
+            let obj = {};
+            const scopeList = context.scopeList;
+            const num = context.num;
+            for (let i = 0, len = num + 1; i < len; i++) {
+                obj = assign(obj, scopeList[i]);
+            }
+            return expr(scope, obj);
+        }
+    };
+}
+// new Docxtemplater(zip, {parser:angularParser});
 
 // Init middleware
 app.use(express.json({limit: '50mb'}));
@@ -92,8 +149,6 @@ app.listen(port, () => {
 
 
 
-
-
 function getSPDocument(documentURI, formData){
     // var sharepointSite = sharepointSite
     var documentURI = documentURI
@@ -111,7 +166,7 @@ function getSPDocument(documentURI, formData){
     formData.forEach(formDataObject => {
         newData = { ...newData, ...formDataObject }
     })
-    console.log(newData)
+    // console.log(newData)
 
 
 
@@ -158,7 +213,7 @@ function getSPDocument(documentURI, formData){
                     const errorMessages = error.properties.errors.map(function (error) {
                         return error.properties.explanation;
                     }).join("\n");
-                    console.log('errorMessages', errorMessages);
+                    // console.log('errorMessages', errorMessages);
                     // errorMessages is a humanly readable message looking like this :
                     // 'The tag beginning with "foobar" is unopened'
                 }
@@ -172,7 +227,9 @@ function getSPDocument(documentURI, formData){
             var zip = new PizZip(content);
             var doc;
             try {
-                doc = new Docxtemplater(zip, {nullGetter() { return ''; }});
+                // doc = new Docxtemplater(zip, {parser:angularParser});
+                // doc = new Docxtemplater(zip, {nullGetter() { return ''; }});
+                doc = new Docxtemplater(zip, {nullGetter() { return ''; }, parser:angularParser});
             } catch(error) {
                 // Catch compilation errors (errors caused by the compilation of the template : misplaced tags)
                 errorHandler(error);
