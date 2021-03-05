@@ -111,7 +111,7 @@ function getSPDocument(documentURI, formData){
     formData.forEach(formDataObject => {
         newData = { ...newData, ...formDataObject }
     })
-    // console.log(newData)
+    console.log(newData)
 
 
 
@@ -172,7 +172,7 @@ function getSPDocument(documentURI, formData){
             var zip = new PizZip(content);
             var doc;
             try {
-                doc = new Docxtemplater(zip);
+                doc = new Docxtemplater(zip, {nullGetter() { return ''; }});
             } catch(error) {
                 // Catch compilation errors (errors caused by the compilation of the template : misplaced tags)
                 errorHandler(error);
