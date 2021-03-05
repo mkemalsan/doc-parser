@@ -55,8 +55,8 @@ expressions.filters.datum = function(input) {
 // var date = "03-11-2014";
 // var newdate = date.split("-").reverse().join("-");
 
-// let bla = "2500"
-// console.log(parseInt(bla).toLocaleString("en-EN", {style: "currency", currency: "EUR", minimumFractionDigits: 2}).replace(',',',.').replace('.','.,').replace(',.','.').replace('.,',',').replace('.00', '.-'))
+let bla = "2500"
+console.log(parseInt(bla).toLocaleString("en-EN", {style: "currency", currency: "EUR", minimumFractionDigits: 2}).replace(',',',/').replace('.','./').replace(',/','.').replace('./',',').replace(',00', ',-'))
 
 function angularParser(tag) {
     if (tag === '.') {
