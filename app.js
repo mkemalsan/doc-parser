@@ -40,7 +40,7 @@ expressions.filters.valuta = function(input) {
     // undefined, your output will be undefined as well and will not
     // throw an error
     if(!input) return input;
-    return parseInt(input).toLocaleString("en-EN", {style: "currency", currency: "EUR", minimumFractionDigits: 2}).replace(',',',.').replace('.','.,').replace(',.','.').replace('.,',',').replace('.00', '.-')
+    return parseInt(input).toLocaleString("en-EN", {style: "currency", currency: "EUR", minimumFractionDigits: 2}).replace(',',',/').replace('.','./').replace(',/','.').replace('./',',').replace(',00', ',-')
 }
 expressions.filters.datum = function(input) {
     // This condition should be used to make sure that if your input is
@@ -55,8 +55,8 @@ expressions.filters.datum = function(input) {
 // var date = "03-11-2014";
 // var newdate = date.split("-").reverse().join("-");
 
-let bla = "2500"
-console.log(parseInt(bla).toLocaleString("en-EN", {style: "currency", currency: "EUR", minimumFractionDigits: 2}).replace(',',',/').replace('.','./').replace(',/','.').replace('./',',').replace(',00', ',-'))
+// let bla = "2500"
+// console.log(parseInt(bla).toLocaleString("en-EN", {style: "currency", currency: "EUR", minimumFractionDigits: 2}).replace(',',',/').replace('.','./').replace(',/','.').replace('./',',').replace(',00', ',-'))
 
 function angularParser(tag) {
     if (tag === '.') {
