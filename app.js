@@ -97,7 +97,7 @@ app.listen(port, () => {
 // ANGULAR STYLE EXPRESSIONS AND CUSTOM FILTERS
 expressions.filters.valuta = function(input) {
     if(!input) return input;
-    return parseInt(input).toLocaleString("en-EN", {style: "currency", currency: "EUR", minimumFractionDigits: 2}).replace(',',',/').replace('.','./').replace(',/','.').replace('./',',').replace(',00', ',-')
+    return parseFloat(input).toLocaleString("en-EN", {style: "currency", currency: "EUR", minimumFractionDigits: 2}).replace(',',',/').replace('.','./').replace(',/','.').replace('./',',').replace(',00', ',-')
 }
 expressions.filters.datum = function(input) {
     if(!input) return input;
