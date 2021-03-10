@@ -10,85 +10,38 @@ const PizZip = require('pizzip')
 const Docxtemplater = require('docxtemplater')
 
 const spauth = require('node-sp-auth')
-const request = require('request-promise')
+const request = require('request-promise') // TODO: REWRITE TO USE NATIVE HTTP REQUESTS
 
 const url = "https://hn594a44314c984.sharepoint.com/"
 const clientId = "fa78755c-5c36-437e-83ec-cffb77c4fe84"
 const clientSecret = "dwcheLsZzbfLcvekh4+lfC5Ef3wjeFvxSXJ3amldfe4="
 
+const expressions = require('angular-expressions')
+const assign = require("lodash/assign")
+
+const sharepointSite = "/sites/testwaarschuwingsbeleidtest2" // TODO: GET SITE URL FROM DATA
+
 var token = ""
-
-const sharepointSite = "/sites/testwaarschuwingsbeleidtest2"
-
 var file = ""
 
-// Please make sure to use angular-expressions 1.1.2 or later
-// More detail at https://github.com/open-xml-templating/docxtemplater/issues/589
-var expressions = require('angular-expressions');
-var assign = require("lodash/assign");
-// define your filter functions here, for example, to be able to write {clientname | lower}
-expressions.filters.lower = function(input) {
-    // This condition should be used to make sure that if your input is
-    // undefined, your output will be undefined as well and will not
-    // throw an error
-    if(!input) return input;
-    return input.toLowerCase();
-}
-
-expressions.filters.valuta = function(input) {
-    // This condition should be used to make sure that if your input is
-    // undefined, your output will be undefined as well and will not
-    // throw an error
-    if(!input) return input;
-    return parseInt(input).toLocaleString("en-EN", {style: "currency", currency: "EUR", minimumFractionDigits: 2}).replace(',',',/').replace('.','./').replace(',/','.').replace('./',',').replace(',00', ',-')
-}
-expressions.filters.datum = function(input) {
-    // This condition should be used to make sure that if your input is
-    // undefined, your output will be undefined as well and will not
-    // throw an error
-    if(!input) return input;
-    return input.split("-").reverse().join("-");
-}
 
 
 
-// var date = "03-11-2014";
-// var newdate = date.split("-").reverse().join("-");
 
-// let bla = "2500"
-// console.log(parseInt(bla).toLocaleString("en-EN", {style: "currency", currency: "EUR", minimumFractionDigits: 2}).replace(',',',/').replace('.','./').replace(',/','.').replace('./',',').replace(',00', ',-'))
 
-function angularParser(tag) {
-    if (tag === '.') {
-        return {
-            get: function(s){ return s;}
-        };
-    }
-    const expr = expressions.compile(
-        tag.replace(/(’|‘)/g, "'").replace(/(“|”)/g, '"')
-    );
-    return {
-        get: function(scope, context) {
-            let obj = {};
-            const scopeList = context.scopeList;
-            const num = context.num;
-            for (let i = 0, len = num + 1; i < len; i++) {
-                obj = assign(obj, scopeList[i]);
-            }
-            return expr(scope, obj);
-        }
-    };
-}
-// new Docxtemplater(zip, {parser:angularParser});
 
 // Init middleware
 app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({extended: true, limit: '50mb'}));
 
+
+
 // Hi!
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
+
+
 
 // POST Request to fill data in placeholders of template
 // REQUEST JSON schema:
@@ -141,10 +94,42 @@ app.listen(port, () => {
 
 
 
+// ANGULAR STYLE EXPRESSIONS AND CUSTOM FILTERS
+expressions.filters.valuta = function(input) {
+    if(!input) return input;
+    return parseInt(input).toLocaleString("en-EN", {style: "currency", currency: "EUR", minimumFractionDigits: 2}).replace(',',',/').replace('.','./').replace(',/','.').replace('./',',').replace(',00', ',-')
+}
+expressions.filters.datum = function(input) {
+    if(!input) return input;
+    return input.split("-").reverse().join("-");
+}
 
+expressions.filters.keuze = function(input) {
+    if(!input) return input;
+    return input.Value
+}
 
-
-
+function angularParser(tag) {
+    if (tag === '.') {
+        return {
+            get: function(s){ return s;}
+        };
+    }
+    const expr = expressions.compile(
+        tag.replace(/(’|‘)/g, "'").replace(/(“|”)/g, '"')
+    );
+    return {
+        get: function(scope, context) {
+            let obj = {};
+            const scopeList = context.scopeList;
+            const num = context.num;
+            for (let i = 0, len = num + 1; i < len; i++) {
+                obj = assign(obj, scopeList[i]);
+            }
+            return expr(scope, obj);
+        }
+    };
+}
 
 
 
