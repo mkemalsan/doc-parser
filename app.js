@@ -51,13 +51,58 @@ app.get('/', (req, res) => {
 // }
 app.post('/', (req, res) => {
 
-    var document = req.body.document;
-    var data = req.body.data;
+    var document = req.body.document
+    var data = req.body.data
+    var newData = {}
 
-
-    data = Buffer.from(data, 'base64');
-    data = data.toString('utf-8');
+    data = Buffer.from(data, 'base64')
+    data = data.toString('utf-8')
     data = JSON.parse(data)
+
+    data.forEach(formDataObject => {
+        newData = { ...newData, ...formDataObject }
+    })
+
+
+
+    document = Buffer.from(document, 'base64')
+    // fs.writeFileSync(path.resolve(__dirname, 'tmp/' + '123.docx'), document)
+
+    // var content = fs
+    //     .readFileSync(path.resolve(__dirname, 'tmp/' + docName), 'binary');
+
+    var zip = new PizZip(document);
+    var doc;
+    try {
+        // doc = new Docxtemplater(zip, {parser:angularParser});
+        // doc = new Docxtemplater(zip, {nullGetter() { return ''; }});
+        doc = new Docxtemplater(zip, {nullGetter() { return ''; }, parser:angularParser})
+    } catch(error) {
+        // Catch compilation errors (errors caused by the compilation of the template : misplaced tags)
+        errorHandler(error)
+    }
+
+    //set the templateVariables
+    doc.setData(newData)
+
+    try {
+        // render the document (replace all occurences of {first_name} by John, {last_name} by Doe, ...)
+        doc.render()
+    }
+    catch (error) {
+        // Catch rendering errors (errors relating to the rendering of the template : angularParser throws an error)
+        errorHandler(error)
+    }
+
+    var buf = doc.getZip()
+                 .generate({type: 'base64'})
+
+
+    // buf is a nodejs buffer, you can either write it to a file or do anything else with it.
+    // buf = Buffer.from(document, 'base64')
+    // fs.writeFileSync(path.resolve(__dirname, 'tmp/' + '456.docx'), buf)
+
+
 
 
     // spauth
@@ -76,9 +121,11 @@ app.post('/', (req, res) => {
     // getSPDocument(document, data)
   
     
+    JSONresponse = req.body
 
+    JSONresponse.document = buf
 
-    res.send(req.body)
+    res.send(JSONresponse)
 
 })
 
@@ -175,7 +222,7 @@ function getSPDocument(documentURI, formData){
           json: true
         })
         .then(response => {
-            const buffer = Buffer.from(response, 'binary');
+            var buffer = Buffer.from(response, 'binary');
             fs.writeFileSync('./tmp/' + docName, buffer);
      
 
@@ -195,7 +242,7 @@ function getSPDocument(documentURI, formData){
                 console.log(JSON.stringify({error: error}, replaceErrors));
 
                 if (error.properties && error.properties.errors instanceof Array) {
-                    const errorMessages = error.properties.errors.map(function (error) {
+                    var errorMessages = error.properties.errors.map(function (error) {
                         return error.properties.explanation;
                     }).join("\n");
                     // console.log('errorMessages', errorMessages);
