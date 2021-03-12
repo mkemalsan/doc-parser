@@ -60,20 +60,20 @@ app.post('/', (req, res) => {
     data = JSON.parse(data)
 
 
-    // spauth
-    // .getAuth('https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/', {
-    // clientId: clientId,
-    // clientSecret: clientSecret
-    // })
-    // .then(data => {
-    //     // console.log(data.headers['Authorization'])
-    //     token = data.headers['Authorization']
-    //     var headers = data.headers;
-    //     headers['Accept'] = 'application/json;odata=verbose';
+    spauth
+    .getAuth('https://hn594a44314c984.sharepoint.com/sites/testwaarschuwingsbeleidtest2/', {
+    clientId: clientId,
+    clientSecret: clientSecret
+    })
+    .then(data => {
+        // console.log(data.headers['Authorization'])
+        token = data.headers['Authorization']
+        var headers = data.headers;
+        headers['Accept'] = 'application/json;odata=verbose';
 
 
-    // });
-    // getSPDocument(document, data)
+    });
+    getSPDocument(document, data)
   
     
 
