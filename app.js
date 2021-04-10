@@ -95,7 +95,7 @@ app.get('/test/', (req, res) => {
 // }
 app.post('/test/', (req, res) => {
 
-    var document = req.body.document
+    var document = Buffer.from(req.body.document)
     var data = Buffer.from(req.body.data, 'base64')
     var templateData = {}
 
