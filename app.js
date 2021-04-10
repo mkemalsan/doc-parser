@@ -81,6 +81,65 @@ app.post('/', (req, res) => {
 
 })
 
+
+// POST Request to fill data in placeholders of template
+// REQUEST JSON schema:
+// {
+//      "document": "String",       Value of string is expected to be a base64 encoded Word document
+//      "data": "String"            Value of string is expected to be a base64 encoded JSON Object
+// }
+app.post('/test/', (req, res) => {
+
+    var document = Buffer.from(req.body.document, 'base64')
+    var data = Buffer.from(req.body.data, 'base64')
+    var templateData = {}
+
+    
+    data = data.toString('utf-8')
+    data = JSON.parse(data)
+
+    data.forEach(formDataObject => {
+        templateData = { ...templateData, ...formDataObject }
+    })
+
+    var zip = new PizZip(document)
+    var doc
+    
+    try {
+        doc = new Docxtemplater(zip, {nullGetter() { return ''; }, parser:angularParser})
+    } catch(error) {
+        // Catch compilation errors (errors caused by the compilation of the template : misplaced tags)
+        errorHandler(error)
+    }
+
+    //set the templateVariables
+    doc.setData(templateData)
+
+    try {
+        // render the document (replace all occurences of {first_name} by John, {last_name} by Doe, ...)
+        doc.render()
+    }
+    catch (error) {
+        // Catch rendering errors (errors relating to the rendering of the template : angularParser throws an error)
+        errorHandler(error)
+    }
+
+    var buf = doc.getZip().generate({type: 'base64'})
+
+    // buf is a nodejs buffer, you can either write it to a file or do anything else with it.
+    // buf = Buffer.from(document, 'base64')
+    // fs.writeFileSync(path.resolve(__dirname, 'tmp/' + '456.docx'), buf)
+    
+    var JSONresponse = {}
+
+    JSONresponse.data       = req.body.data
+    JSONresponse.document   = buf
+    JSONresponse.pdf        = pdf
+
+    res.send(JSONresponse)
+
+})
+
 app.listen(port, () => {
   console.log(`Listening at port:${port}`)
 })
