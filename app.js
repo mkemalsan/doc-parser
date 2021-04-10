@@ -82,6 +82,11 @@ app.post('/', (req, res) => {
 })
 
 
+
+app.get('/test/', (req, res) => {
+    res.send('test')
+}
+
 // POST Request to fill data in placeholders of template
 // REQUEST JSON schema:
 // {
