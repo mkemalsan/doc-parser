@@ -141,7 +141,9 @@ app.post('/test/', (req, res) => {
     // JSONresponse.document   = buf
     // // JSONresponse.pdf        = pdf
 
-    res.send(document)
+    var JSON = {"document": document};
+
+    res.send(JSON)
 
 })
 
