@@ -95,7 +95,7 @@ app.get('/test/', (req, res) => {
 // }
 app.post('/test/', (req, res) => {
 
-    var document = Buffer.from(req.body.document, 'base64')
+    var document = Buffer.from(req.body.document.$content, 'base64')
     var data = Buffer.from(req.body.data, 'base64')
     var templateData = {}
 
@@ -106,6 +106,8 @@ app.post('/test/', (req, res) => {
     data.forEach(formDataObject => {
         templateData = { ...templateData, ...formDataObject }
     })
+
+    console.log(document)
 
     var zip = new PizZip(document)
     var doc
@@ -141,9 +143,8 @@ app.post('/test/', (req, res) => {
     JSONresponse.document   = buf
     // JSONresponse.pdf        = pdf
 
-    var JSON = {"document":  buf};
 
-    res.send(JSON)
+    res.send(JSONresponse)
 
 })
 
