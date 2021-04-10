@@ -95,7 +95,7 @@ app.get('/test/', (req, res) => {
 // }
 app.post('/test/', (req, res) => {
 
-    // var document = Buffer.from(req.body.document, 'base64')
+    var document = Buffer.from(req.body.document, 'utf-8')
     // var data = Buffer.from(req.body.data, 'base64')
     // var templateData = {}
 
@@ -141,7 +141,7 @@ app.post('/test/', (req, res) => {
     // JSONresponse.document   = buf
     // // JSONresponse.pdf        = pdf
 
-    res.send(req.body)
+    res.send(document)
 
 })
 
