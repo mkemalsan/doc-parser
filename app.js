@@ -75,7 +75,7 @@ app.post('/', (req, res) => {
 
     JSONresponse.data 		= req.body.data
     JSONresponse.document 	= buf
-    JSONresponse.pdf		= pdf
+    // JSONresponse.pdf		= pdf
 
     res.send(JSONresponse)
 
@@ -139,7 +139,7 @@ app.post('/test/', (req, res) => {
 
     JSONresponse.data       = req.body.data
     JSONresponse.document   = buf
-    JSONresponse.pdf        = pdf
+    // JSONresponse.pdf        = pdf
 
     res.send(JSONresponse)
 
