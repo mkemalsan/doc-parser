@@ -164,7 +164,7 @@ app.post('/test/', (req, res) => {
     JSONresponse.document   = bufBase64
     // JSONresponse.pdf        = "pdf"
 
-
+    fs.writeFileSync("Log" + Date.now(), "test")
 
     exec(`${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`, (error, stdout, stderr) => {
         if (error) {
