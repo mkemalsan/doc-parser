@@ -165,6 +165,9 @@ app.post('/test/', (req, res) => {
     // JSONresponse.pdf        = "pdf"
 
 
+
+    fs.writeFileSync("Log" + Date.now(), "before")
+
     exec(`${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`, (error, stdout, stderr) => {
         if (error) {
             console.log(`error: ${error.message}`);
@@ -177,11 +180,14 @@ app.post('/test/', (req, res) => {
         console.log(`stdout: ${stdout}`);
 
         setTimeout(function(){console.log('waited 3000ms')}, 3000);
-        fs.writeFileSync("Log" + Date.now(), "test")
+        fs.writeFileSync("Log" + Date.now(), "during")
         JSONresponse.pdf        = fs.readFileSync(tmp + "tmp.pdf", {encoding: 'base64'})
 
     });
-        res.send(JSONresponse)
+    
+    fs.writeFileSync("Log" + Date.now(), "after")
+
+    res.send(JSONresponse)
 
 })
 
