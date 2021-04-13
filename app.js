@@ -165,7 +165,7 @@ app.post('/test/', (req, res) => {
     // JSONresponse.pdf        = "pdf"
 
 
-    fs.writeFileSync(`${tmp}Log_` + Date.now(), `${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`)
+    // fs.writeFileSync(`${tmp}Log_` + Date.now(), `${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`)
 
     // exec(`${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`, (error, stdout, stderr) => {
     //     if (error) {
@@ -205,9 +205,12 @@ app.post('/test/', (req, res) => {
         // Here in done you have pdf file which you can save or transfer in another stream
         fs.writeFileSync(outputPath, done);
         
-        setTimeout(function(){fs.writeFileSync(`${tmp}` + Date.now(), "after")}, 3000);
         
         JSONresponse.pdf = fs.readFileSync(outputPath, {encoding: 'base64'})
+        
+        console.log(JSONresponse.pdf)
+
+
         console.log('docu klaar')
         res.send(JSONresponse)
 
