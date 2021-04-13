@@ -167,7 +167,7 @@ app.post('/test/', (req, res) => {
 
     fs.writeFileSync(`${tmp}Log_` + Date.now(), `${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`)
 
-    // execFileSync(`${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`, (error, stdout, stderr) => {
+    // exec(`${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`, (error, stdout, stderr) => {
     //     if (error) {
     //         console.log(`error: ${error.message}`);
     //         return;
@@ -184,14 +184,43 @@ app.post('/test/', (req, res) => {
 
     // });
     
-    execSync(`${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`)
+    // execSync(`${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`)
     
-    
-    setTimeout(function(){fs.writeFileSync(`${tmp}` + Date.now(), "after")}, 3000);
-    
-    JSONresponse.pdf = fs.readFileSync(tmp + "tmp.pdf", {encoding: 'base64'})
 
-    res.send(JSONresponse)
+    const libre = require('libreoffice-convert');
+     
+
+    const extend = '.pdf'
+    const enterPath = path.join(__dirname, '/tmp/tmp.docx');
+    const outputPath = path.join(__dirname, `/tmp/tmp${extend}`);
+     
+    // Read file
+    const file = fs.readFileSync(enterPath);
+    // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
+    libre.convert(file, extend, undefined, (err, done) => {
+        if (err) {
+          console.log(`Error converting file: ${err}`);
+        }
+        
+        // Here in done you have pdf file which you can save or transfer in another stream
+        fs.writeFileSync(outputPath, done);
+        
+        setTimeout(function(){fs.writeFileSync(`${tmp}` + Date.now(), "after")}, 3000);
+        
+        JSONresponse.pdf = fs.readFileSync(outputPath, {encoding: 'base64'})
+        console.log('docu klaar')
+        res.send(JSONresponse)
+
+
+    });
+
+
+
+    // setTimeout(function(){fs.writeFileSync(`${tmp}` + Date.now(), "after")}, 3000);
+    
+    // JSONresponse.pdf = fs.readFileSync(tmp + "tmp.pdf", {encoding: 'base64'})
+
+    // res.send(JSONresponse)
 
 
 })
