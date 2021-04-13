@@ -164,29 +164,34 @@ app.post('/test/', (req, res) => {
     JSONresponse.document   = bufBase64
     // JSONresponse.pdf        = "pdf"
 
-    res.send(JSONresponse)
 
     fs.writeFileSync(`${tmp}Log_` + Date.now(), `${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`)
 
-    execFileSync(`${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`, (error, stdout, stderr) => {
-        if (error) {
-            console.log(`error: ${error.message}`);
-            return;
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`);
-            return;
-        }
-        console.log(`stdout: ${stdout}`);
+    // execFileSync(`${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`, (error, stdout, stderr) => {
+    //     if (error) {
+    //         console.log(`error: ${error.message}`);
+    //         return;
+    //     }
+    //     if (stderr) {
+    //         console.log(`stderr: ${stderr}`);
+    //         return;
+    //     }
+    //     console.log(`stdout: ${stdout}`);
 
-        setTimeout(function(){console.log('waited 3000ms')}, 3000);
-        fs.writeFileSync("Log" + Date.now(), "during")
-        JSONresponse.pdf        = fs.readFileSync(tmp + "tmp.pdf", {encoding: 'base64'})
+    //     setTimeout(function(){console.log('waited 3000ms')}, 3000);
+    //     fs.writeFileSync("Log" + Date.now(), "during")
+    //     JSONresponse.pdf        = fs.readFileSync(tmp + "tmp.pdf", {encoding: 'base64'})
 
-    });
+    // });
     
-    fs.writeFileSync(`${tmp}` + Date.now(), "after")
+    execFileSync(`${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`)
+    
+    
+    setTimeout(function(){fs.writeFileSync(`${tmp}` + Date.now(), "after")}, 3000);
+    
+    JSONresponse.pdf = fs.readFileSync(tmp + "tmp.pdf", {encoding: 'base64'})
 
+    res.send(JSONresponse)
 
 
 })
