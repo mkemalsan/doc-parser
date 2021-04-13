@@ -177,12 +177,11 @@ app.post('/test/', (req, res) => {
         console.log(`stdout: ${stdout}`);
 
         setTimeout(function(){console.log('waited 3000ms')}, 3000);
-    fs.writeFileSync("Log" + Date.now(), "test")
-
+        fs.writeFileSync("Log" + Date.now(), "test")
         JSONresponse.pdf        = fs.readFileSync(tmp + "tmp.pdf", {encoding: 'base64'})
 
-        res.send(JSONresponse)
     });
+        res.send(JSONresponse)
 
 })
 
