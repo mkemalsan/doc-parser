@@ -164,7 +164,6 @@ app.post('/test/', (req, res) => {
     JSONresponse.document   = bufBase64
     // JSONresponse.pdf        = "pdf"
 
-    fs.writeFileSync("Log" + Date.now(), "test")
 
     exec(`${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`, (error, stdout, stderr) => {
         if (error) {
@@ -178,6 +177,7 @@ app.post('/test/', (req, res) => {
         console.log(`stdout: ${stdout}`);
 
         setTimeout(function(){console.log('waited 3000ms')}, 3000);
+    fs.writeFileSync("Log" + Date.now(), "test")
 
         JSONresponse.pdf        = fs.readFileSync(tmp + "tmp.pdf", {encoding: 'base64'})
 
