@@ -11,6 +11,8 @@ const Docxtemplater = require('docxtemplater')
 const expressions = require('angular-expressions')
 const assign = require("lodash/assign")
 
+const { exec } = require("child_process");
+
 
 // Init middleware
 app.use(express.json({limit: '50mb'}));
@@ -95,7 +97,33 @@ app.get('/test/', (req, res) => {
 // }
 app.post('/test/', (req, res) => {
 
-    var document = Buffer.from(req.body.document, 'utf-8').toString('base64')
+    var root    = "/var/www/vhosts/deggroep.nl/api.deggroep.nl"
+    var soffice = ""
+
+    switch (process.platform) {
+        case 'darwin': soffice = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
+            break;
+        case 'linux' : soffice = root + "/bin/squashfs-root/opt/libreoffice7.1/program/soffice"
+            break;
+    }
+
+    exec(`${soffice} --convert-to pdf --outdir /var/www/vhosts/deggroep.nl/api.deggroep.nl/api.deggroep.nl/tmp/ /var/www/vhosts/deggroep.nl/api.deggroep.nl/api.deggroep.nl/tmp/AOK-001.docx`, (error, stdout, stderr) => {
+        if (error) {
+            console.log(`error: ${error.message}`);
+            return;
+        }
+        if (stderr) {
+            console.log(`stderr: ${stderr}`);
+            return;
+        }
+        console.log(`stdout: ${stdout}`);
+    });
+
+
+
+    console.log(req.headers)
+
+    var document = Buffer.from(req.body.document, 'base64')
     var data = Buffer.from(req.body.data, 'base64')
     var templateData = {}
 
@@ -107,7 +135,7 @@ app.post('/test/', (req, res) => {
         templateData = { ...templateData, ...formDataObject }
     })
 
-    console.log(document)
+    // console.log(document)
 
     var zip = new PizZip(document)
     var doc
