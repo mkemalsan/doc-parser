@@ -96,47 +96,18 @@ app.get('/test/', (req, res) => {
 //      "data": "String"            Value of string is expected to be a base64 encoded JSON Object
 // }
 app.post('/test/', (req, res) => {
-
-    var root    = "/var/www/vhosts/deggroep.nl/api.deggroep.nl"
-    var soffice = ""
-
-    switch (process.platform) {
-        case 'darwin': soffice = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
-            break;
-        case 'linux' : soffice = root + "/bin/squashfs-root/opt/libreoffice7.1/program/soffice"
-            break;
-    }
-
-    exec(`${soffice} --convert-to pdf --outdir /var/www/vhosts/deggroep.nl/api.deggroep.nl/api.deggroep.nl/tmp/ /var/www/vhosts/deggroep.nl/api.deggroep.nl/api.deggroep.nl/tmp/AOK-001.docx`, (error, stdout, stderr) => {
-        if (error) {
-            console.log(`error: ${error.message}`);
-            return;
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`);
-            return;
-        }
-        console.log(`stdout: ${stdout}`);
-    });
-
-
-
     console.log(req.headers)
 
     var document = Buffer.from(req.body.document, 'base64')
+
     var data = Buffer.from(req.body.data, 'base64')
     var templateData = {}
-
-    
     data = data.toString('utf-8')
     data = JSON.parse(data)
 
     data.forEach(formDataObject => {
         templateData = { ...templateData, ...formDataObject }
     })
-
-    // console.log(document)
-
     var zip = new PizZip(document)
     var doc
     
@@ -159,20 +130,65 @@ app.post('/test/', (req, res) => {
         errorHandler(error)
     }
 
-    var buf = doc.getZip().generate({type: 'base64'})
+    var buf = doc.getZip().generate({type: 'nodebuffer'})
+    var bufBase64 = doc.getZip().generate({type: 'base64'})
 
     // buf is a nodejs buffer, you can either write it to a file or do anything else with it.
-    // buf = Buffer.from(document, 'base64')
-    // fs.writeFileSync(path.resolve(__dirname, 'tmp/' + '456.docx'), buf)
+    var dest = path.resolve(__dirname, 'tmp/' + 'tmp.docx')
+    fs.writeFileSync(dest, buf)
+
+
+    var root = "/var/www/vhosts/deggroep.nl/api.deggroep.nl",
+    soffice,
+    tmp
+
+
+    switch (process.platform) {
+        case 'darwin':
+            soffice = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
+            tmp     = "/Users/mkemalsan/Documents/GitHub/doc-parser/tmp/"
+            break;
+        case 'linux' :
+            soffice = root + "/bin/squashfs-root/opt/libreoffice7.1/program/soffice"
+            tmp     = root + "/tmp/"
+            break;
+    }
+
+
+
+    
     
     var JSONresponse = {}
 
     JSONresponse.data       = req.body.data
-    JSONresponse.document   = buf
-    // JSONresponse.pdf        = pdf
+    JSONresponse.document   = bufBase64
+    // JSONresponse.pdf        = "pdf"
 
 
-    res.send(JSONresponse)
+
+    exec(`${soffice} -env:UserInstallation=file://${tmp} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`, (error, stdout, stderr) => {
+        if (error) {
+            console.log(`error: ${error.message}`);
+            return;
+        }
+        if (stderr) {
+            console.log(`stderr: ${stderr}`);
+            return;
+        }
+        console.log(`stdout: ${stdout}`);
+
+        JSONresponse.pdf        = fs.readFileSync(tmp + "tmp.pdf", {encoding: 'base64'})
+
+        res.send(JSONresponse)
+    });
+
+
+
+
+    
+
+
+
 
 })
 
