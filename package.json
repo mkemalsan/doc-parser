@@ -22,6 +22,7 @@
     "angular-expressions": "^1.1.3",
     "docxtemplater": "^3.20.1",
     "express": "^4.17.1",
+    "libreoffice-convert": "https://github.com/mkemalsan/libreoffice-convert.git",
     "lodash": "^4.17.21",
     "nodemon": "^2.0.7",
     "pizzip": "^3.0.6",
