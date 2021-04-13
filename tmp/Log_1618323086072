@@ -1,0 +1,1 @@
+/Applications/LibreOffice.app/Contents/MacOS/soffice --convert-to pdf --outdir /Users/mkemalsan/Documents/GitHub/doc-parser/tmp/ /Users/mkemalsan/Documents/GitHub/doc-parser/tmp/tmp.docx

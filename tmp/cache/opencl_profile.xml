@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<profile>
+ <version>LibreOffice v1</version>
+ <device>
+  <type>opencl</type>
+  <name>Intel(R) Core(TM) i7-4770HQ CPU @ 2.20GHz</name>
+  <driver>1.1</driver>
+  <time>1656950</time>
+  <errors>false</errors>
+ </device>
+ <device>
+  <type>opencl</type>
+  <name>Iris Pro</name>
+  <driver>1.2(Feb  5 2021 21:45:37)</driver>
+  <time>max</time>
+  <errors>false</errors>
+ </device>
+ <device>
+  <type>native</type>
+  <time>13853184</time>
+  <errors>false</errors>
+ </device>
+</profile>

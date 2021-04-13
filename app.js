@@ -11,8 +11,8 @@ const Docxtemplater = require('docxtemplater')
 const expressions = require('angular-expressions')
 const assign = require("lodash/assign")
 
-const { execSync } = require("child_process");
-
+const libre = require('libreoffice-convert');
+const extend = '.pdf'
 
 // Init middleware
 app.use(express.json({limit: '50mb'}));
@@ -162,35 +162,7 @@ app.post('/test/', (req, res) => {
 
     JSONresponse.data       = req.body.data
     JSONresponse.document   = bufBase64
-    // JSONresponse.pdf        = "pdf"
 
-
-    // fs.writeFileSync(`${tmp}Log_` + Date.now(), `${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`)
-
-    // exec(`${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`, (error, stdout, stderr) => {
-    //     if (error) {
-    //         console.log(`error: ${error.message}`);
-    //         return;
-    //     }
-    //     if (stderr) {
-    //         console.log(`stderr: ${stderr}`);
-    //         return;
-    //     }
-    //     console.log(`stdout: ${stdout}`);
-
-    //     setTimeout(function(){console.log('waited 3000ms')}, 3000);
-    //     fs.writeFileSync("Log" + Date.now(), "during")
-    //     JSONresponse.pdf        = fs.readFileSync(tmp + "tmp.pdf", {encoding: 'base64'})
-
-    // });
-    
-    // execSync(`${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`)
-    
-
-    const libre = require('libreoffice-convert');
-     
-
-    const extend = '.pdf'
     const enterPath = path.join(__dirname, '/tmp/tmp.docx');
     const outputPath = path.join(__dirname, `/tmp/tmp${extend}`);
      
@@ -207,11 +179,7 @@ app.post('/test/', (req, res) => {
         
         
         JSONresponse.pdf = fs.readFileSync(outputPath, {encoding: 'base64'})
-        
-        console.log(JSONresponse.pdf)
 
-
-        console.log('docu klaar')
         res.send(JSONresponse)
 
 
