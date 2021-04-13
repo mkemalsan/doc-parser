@@ -166,7 +166,7 @@ app.post('/test/', (req, res) => {
 
 
 
-    fs.writeFileSync("Log" + Date.now(), "before")
+    fs.writeFileSync(`${tmp}Log_` + Date.now(), `${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`)
 
     execSync(`${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`, (error, stdout, stderr) => {
         if (error) {
