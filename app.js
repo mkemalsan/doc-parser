@@ -11,7 +11,7 @@ const Docxtemplater = require('docxtemplater')
 const expressions = require('angular-expressions')
 const assign = require("lodash/assign")
 
-const { exec } = require("child_process");
+const { execSync } = require("child_process");
 
 
 // Init middleware
@@ -168,7 +168,7 @@ app.post('/test/', (req, res) => {
 
     fs.writeFileSync("Log" + Date.now(), "before")
 
-    exec(`${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`, (error, stdout, stderr) => {
+    execSync(`${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`, (error, stdout, stderr) => {
         if (error) {
             console.log(`error: ${error.message}`);
             return;
