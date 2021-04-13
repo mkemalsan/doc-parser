@@ -166,7 +166,7 @@ app.post('/test/', (req, res) => {
 
 
 
-    exec(`${soffice} -env:UserInstallation=file://${tmp} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`, (error, stdout, stderr) => {
+    exec(`${soffice} --convert-to pdf --outdir ${tmp} ${tmp}tmp.docx`, (error, stdout, stderr) => {
         if (error) {
             console.log(`error: ${error.message}`);
             return;
@@ -181,14 +181,6 @@ app.post('/test/', (req, res) => {
 
         res.send(JSONresponse)
     });
-
-
-
-
-    
-
-
-
 
 })
 
