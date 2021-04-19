@@ -103,8 +103,8 @@ app.post('/', (req, res) => {
             tmp     = "/Users/mkemalsan/Documents/GitHub/doc-parser/tmp/"
             break;
         case 'linux' :
-            soffice = root + "/bin/squashfs-root/opt/libreoffice7.1/program/soffice"
-            tmp     = root + "/tmp/"
+            soffice = "./bin/squashfs-root/opt/libreoffice7.1/program/soffice"
+            tmp     = "./tmp/"
             break;
     }
 
@@ -116,8 +116,8 @@ app.post('/', (req, res) => {
     JSONresponse.document   = bufBase64
 
    
-    const outputDocument = path.join(__dirname, `tmp/${timeStamp}.docx`);
-    const outputPDF = path.join(__dirname, `tmp/${timeStamp}.pdf`);
+    const outputDocument = path.join(__dirname, `${tmp}/${timeStamp}.docx`);
+    const outputPDF = path.join(__dirname, `${tmp}/${timeStamp}.pdf`);
      
     // Read file
     const file = fs.readFileSync(outputDocument);
